@@ -1,0 +1,567 @@
+---
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+# Probabilidad
+
+## Probabilidades discretas.
+
+Las probabilidades discretas se aplican a variables categóricas y son
+una buena forma de introducirse a la probabilidad. Para estas
+probabilidades p se define como: **p(e) = resultados
+positivos/resultados posibles** siendo resultados "positivos" la
+cantidad posible de resultados que coincidan con el evento y siendo los
+resultados posibles el universo de todos los resultados que se pueden
+derivar de un experimento independiente en el que todos los eventos
+tienen la posibilidad de ocurrir.. Esto nos permitirá introducir
+posteriormente la probabilidad para variables numéricas o continuas.
+
+### Simulaciones Monte Carlo.
+
+Las simulaciones Monte Carlo modelan la probabilida de diferentes
+resultados, repitiendo un proceso aleatorio el número suficiente de
+veces, de tal forma que se ajuste a los resultados esperados si este
+proceso se repitiera infinitamente.
+
+Por ejemplo, tengo una urna en la que tengo dos bolas rojas y tres
+azules. Voy a repetir un procedimiento mediante el cual saque una bola
+de la urna, el número suficiente de veces como para demostrar que las
+probabilidades asociadas a este experimento son 2/5 para el rojo, y 3/5
+para el azul.
+
+```{r}
+urna <- rep(c("blue", "red"), times=c(3,2))
+urna
+
+```
+
+Aquí ya tengo mi urna, ahora voy a escoger una balota:
+
+```{r}
+sample(urna, 1)
+```
+
+Ahora voy a replicar este evento 10000 veces:
+
+```{r}
+repeticiones <- 10000
+eventos <- replicate(repeticiones, sample(urna, 1))
+
+
+```
+
+Ahora, voy a calcular las distribuciones de frecuencia para cada uno de
+los posibles resultados en eventos:
+
+```{r}
+distribuciones <- table(eventos)
+distribuciones
+prop.table(distribuciones)
+```
+
+Se aprecia que después de 10000 repeticiones la distribuciona de
+resultados es igual a la esperada.
+
+Este es un caso muy sencillo, pero vamos a estar aplicándolo en casos
+más complicados.
+
+Respecto al ejercicio anterior, era muy fácil llevar a cabo el ejercicio
+con una sóla línea de código, teniendo en cuenta que para que la función
+sample haga el mismo trabajo que replicate, sólo debemos activar a TRUE
+el argumento de replace:
+
+```{r}
+prop.table(table(sample(urna, 10000, replace=TRUE)))
+```
+
+### Distribuciones de probabilidad:
+
+**Las distribuciones de probabilidad para una variable, describen la
+probabilidad de observar cada resultado posible** Las distribuciones de
+probabilidad para eventos categóricos como el mencionado hasta aquí son
+realmente sencillos: se trata de la distribución probabilística para
+cada evento, como ya se mencionó aquí. Sin embargo, para el caso de las
+variables numéricas es mucho más complejo.
+
+### Probabilidad de eventos dependientes e independientes.
+
+En primer lugar, es necesario recordar que cuando queremos calcular la
+probabilidad de que dos eventos se presenten al mismo tiempo,
+multiplicamos las probabilidades. Por ejemplo: probabilidad de que caiga
+una cara en una moneda y un 2 en un dado, son iguales a 1/2\*1/6, lo
+cual arroja 0.083.
+
+#### Probabilidad de eventos independientes: 
+
+Cuando un experimento no afecta la probabilidad del resultado en el
+siguiente experimento, lo llamamos evento independiente, por ejemplo en
+el caso del dado y la moneda. Para calcular estos eventos sólo hacemos
+la pultiplicación: \*\*Pr(A y B)= Pr(A)\*Pr(B)\*\*
+
+#### Probabilidad de eventos dependientes:
+
+Cuando un experimento afecta la probabilidad del resultado en el
+siguiente experimento, lo llamamos evento dependientes. Por ejemplo, en
+nuestra urna de 3 balutas azules y dos rojas, supongamos que queremos
+calcular las probabilidades de obtener 2 azules cuando se sacan dos
+balotas sin volver a depositar en la urna aquella que ya se sacó. En ese
+escenario la probabilidad de ambos eventos es igual a la probabilidad
+del primer evento por la probabilidad del segundo dado el primero: **
+Pr(A y B)= Pr(A)\*Pr(B\|A)**
+En este caso: 
+Pr(Azul y Azul) = 2/5*1/4 = 0.1
+
+#### Probabilidad de eventos dependientes con más de dos eventos. 
+Es posible que se presenten eventos múltiples, en ese caso se hace la multiplicación según corresponda: 
+Pr(A y B y C) = Pr(A)*Pr(B|A)*Pr(C|A y B). 
+
+## Combinaciones y permutaciones: 
+Las computaciones que se hicieron hasta el momento no son útiles o claras para eventos más complejos. Por ejemplo, en un juego de poker, cuál es la probabilidad de que si saco 5 cartas, todas las cartas sean del mismo símbolo. 
+Las probabilidades discretas nos enseñan a hacer estas computaciones usando las matemáticas. 
+
+Ahora vamos a hacer un conjunto de cartas con el fin de practicar combinaciones y permutaciones. 
+```{r}
+símbolos<-c("Corazones", "Diamantes", "Espadas", "Diamantes")
+numeros <- c("a", "dos","tres", "cuatro", "cinco", "seis", "siete", "ocho", "nueve", "diez", "j", "q","k")
+mazo <- expand.grid(números = numeros, símbolos = símbolos)
+mazo <- paste(mazo$números, mazo$símbolos)
+mazo
+
+```
+
+Ahora podemos calcular probabilidades: 
+```{r}
+# probabilidad de que haya una k corazones en el mazo: 
+mean(mazo %in%"k Corazones" )
+
+# probabilidad de que haya una ka en el mazo:
+evento <- paste("k", símbolos)
+mean(mazo %in% evento)
+
+
+
+```
+
+¿Cómo calcular la probabilidad de que la segunda carta sea una k, si la primera carta fue una k?
+Primero identifiquemos todas las formas en las que podríamos obtener dos cartas, que sacamos de un mazo de 52 cartas: 
+
+```{r}
+manos <- permutations(37,2, v= mazo)
+```
+
+##La regla de la adición. 
+Para computar la probabilidad de 21 en blackJack, debemos calcular la probabilidad de tener una carta con cara, y un as en el primer turno.
+
+La regla de la adición muestra que esto es posible calcularlo. 
+La relgla de la adicion refiere que la probabilidad de A o B es igual a la probabilidad de A + la probabilidad de B - la probabilidad de A y B. 
+
+Pr(A or B) = Pr(A)+pr(B)-Pr(A y B)
+
+En el caso del 21 natural la intersección está vacía. 
+
+
+
+## Distribución teórica
+
+La distrubición normal es una aproximación útil para muchas variables que ocurren normalmente. En función acumulativa normal se obtiene en r con pnorm. Esta distribución es útil para variables numéricas, pero buena parte del trabajo en ciencia de datos es con variables que, técnicamente, son discretas. Para variables discretas numéricas, a menudo es útil tratarlas como continuas, e incluir los valores discretos en un intervalo. 
+Lo anterior se debe a que los valores discretos son más frecuentes que los esperados probabilísticamente, fenémeno al cual se le llama discretización. 
+
+### Densidad de probabilidad. 
+Para variables categóricas, podemos definir su probabilidad simplemente sumando las respectivas probabilidades. Por ejemplo, en un lanzamiento de dados, la probabilidad de que salga un número menor o igual que cuatro, es simplemente la suma de las probabilidades para 1, 2, 3, 4. 
+En contraste, para una distribución continua, la probabilidad para cada valor no está definida. Sin embargo, hay una definición teórica que tiene una interpretación similar, la cual está relacionada con la densidad de probabilidad. La densidadd de probabilidad está dada por una curva calculada mediante cálculo integral, y que en términos simples se refiere a la suma de probabilidades menores que x, que constituyen los valores que hay bajo esa curva.  
+En R, la función para la curva de densidad normal se obtiene mediante la dnorm()
+
+#### Dibujar una curva de densidad normal
+Para m=0 y sd=1, vamos a usar una secuencia de número de entre -4 y +4. Vamos a usar 100 números en ese intervalo y vamos a calcular la densidad para cada uno, luego lo vamos a dibujarlo con ggplot
+```{r}
+library(tidyverse)
+x <- seq(-4, 4, length = 100)
+y <- dnorm(x)
+data <- data.frame(x,y)
+data %>% ggplot(aes(x,y))+
+  geom_line()
+```
+
+### Simulaciones montecarlo con distribuciones normales: 
+La función rnorm() arroja el número determinado de resultados aleatorios con base en una distribución normal, con la m y la ds especificada. 
+
+```{r}
+ggplot()+
+  geom_histogram(aes(x = rnorm(200)), color="black", binwidth = 1)
+```
+
+Esta distribución, se ve, es normal. 
+
+La distribución rnorm() es muy útil porque permite simular un evento real, y por lo tanto permite realizar simulaciones montecarlo. 
+Por ejemplo, ¿Cuál es la distribución de la altura de 800 hombres con media de 170 cm y ds de 20)
+
+```{r}
+ggplot()+
+  geom_histogram(aes(rnorm(800, 170,20)), color="black", binwidth = 5)
+```
+
+También podemos suponer que, dada una distribución como esa, quiero saber, mediante una simulación montecarlo, cuál es la probabilidad de que me encuentre personas con alturas mayores a 180. 
+```{r}
+mean(rnorm(800, 170,20)>180)
+```
+
+## Variables aleatorias, Modelos de muestreo y teorema del límite central
+### Variables aleatoraias: 
+Son resultados numéricos que resultan de un proceso aleatorio. 
+Podemos generar fácilmente variables aleatorias, usando algunos de los ejemplos simples que se han venido utilizando. 
+POr ejemplo, con la balotera: 
+```{r}
+# vamos a asignar 1 si es azul o cero si es roja la bola. 
+balotera <- rep(c("red", "blue"), times = c(2,3)) #replica dos veces rojo y tres el azul. 
+X <- ifelse(sample(balotera, 1) =="blue", 1, 0) # cada vez que se saca una balota, se le asigna un uno si es azul o un cero si es rojo. 
+
+```
+
+En el caso anterior, X es una variable aleatoria, Cada vez que se selecciona una balota, el resultado cambia aleatoriamente. Es decir, el resultado se debe a la aleatoriedad de la variable (considerando que hay además elementos como el error, el cual también es aleatorio). 
+En ese sentido, es muy importante aprender a cuantificar la incertidumbre introducida por la aleatoriedad. La inferencia estadística ayuda a entender esa incertidumbre. 
+El paso inicial más importante es aprender a describir matemáticamente las variables aleatorias. 
+
+
+### Modelos de muestreo: 
+
+Muchos de los procedimientos que se estudian con los datos, son susceptibles de ser modelados mediante el acto de sacar una balota de una urna. Por ejemplo, podría modelarse el proceso de encuesta presidencial para la segunda vuelta, asignando un 1 a petro y un 0 a rodolfo, y extrayendo aleatoriamente de la urna. 
+
+** En los estudios epidemiológicos, generalmente se asume que los sujetos en el estudio son uma muestra aleatoria de la población de interés**, Siendo así, los datos relacionados con un resultado específico, pueden modelarse como una muestra de balotas que se han seleccionado, aleatoriamente, de una urna que contiene a toda la población. 
+
+Por lo tanto, nuestros datos suelen ser producto del muestreo; es decir, los modelos de muestreo suelen ser ubicuos en la ciencia de datos. 
+
+Los juegos de casino son una gran fuente de ejemplos en los que modelos de muestreo permiten responder preguntas específicas. 
+
+#### Usando juegos de casino. 
+
+Vamos a jugar con una ruleta de un casino, cuyo dueño está interesado en saber si vale la pena (si de ganancias), instalar la ruleta. Para mantenerlo simple, vamos a jugar sólo con negro y rojo. Las ruletas tienen 18 espacios rojos, 18 negros y dos verdes.  
+
+Jugar a un color en una ruleta, es equivalente a apostar a que se sacará dicho color desde una urna. 
+```{r}
+colores_ruleta <- rep(c("Negro", "Rojo", "Verde"), c(18,18,2) )
+```
+
+Jugar a la ruleta equivale a jugar con reemplazo, pues el que alguien gane en un primer experimento, no afecta la probabilidad de ganar en los siguiente. Suponemos que cada vez que el cliente apuesta a rojo y cada vez que gana, el casino pierde un dolar. Lo simularemos 1000 veces
+
+```{r}
+n <- 1000
+X <- sample(ifelse(colores_ruleta=="Rojo", -1, 1), n, replace=TRUE)
+X
+```
+
+Sabemos que la proporción de dólareas ganados, vs dólares perdidos es de 20/38 para los ganados, y 18/38 para los perdidos. Es decir, el dueño del casino tiene una pequeña ventaja. En ese sentido, podríamos construir la variable aleatoria muy fácilmente : 
+```{r}
+X <- sample(c(1,-1), n, replace = TRUE, prob = c(20/38, 18/38))
+X
+```
+Esta aproximación es un modelo de muestreo, pues estamos modelando el comportamiento aleatorio de una ruleta con el muestreo de balotas en una urna. 
+
+S representa lo que ganará el propietario del casino con estos 1000 juegos aleatorios: 
+
+```{r}
+sum(X)
+```
+Si sumamos S en varias ocasiones, veremos que cambia, esto se debe a que es una variable aleatoria. 
+
+### La distribución de probabilidad de una variable aleatoria. 
+
+La distribución de probabilidad de una variable aleatoria, da cuenta de la probabilidad de  un valor observado, que se ubique en cualquier intervalo. 
+Así, podemos preguntarnos ¿Cuál es la probabilidad de que el dueño del casino pierda dinero? Esta y muchas más preguntas podemos responderlas si conocemos la distribución de la variable aleatoria. Para este caso, la distribución de la variable aleatoria podría definirse como : 
+f(a) = pr(S<=a)
+
+Para verlo, hagamos una simulación montecarlo, en el que repitamos 10000 veces un ejercicio que considere las ganancias totales que el dueño del casino tiene luego de 1000 juegos: 
+
+```{r}
+n<- 1000
+B <- 10000
+S <- replicate(B, {
+  X<- sample(c(-1,1), n, replace = TRUE, prob = c(18/38, 20/38))
+  sum(X)
+})
+```
+
+Ahora, podríamos graficar S: 
+
+```{r}
+mean(S)
+sd(S)
+hist(S)
+```
+
+Vemos que la media y la desviación estándar son de 52.4 y 31.7. 
+
+Esta media y esta desviación estándar tienen un nombre especial: **Valor esperado y error estandar** Nótese que esto se debe a que son medidas aplicadas a la variable aleatoria. 
+
+También vemos que la frecuencia de pérdidas después de conjuntos de 1000 juegos, es baja. ¿En qué porcentaja de experimentos pierde dinero?
+
+```{r}
+mean(S<0)
+```
+
+En el 4.5% de las veces en las que se corre el experimento con 1000 juegos. 
+
+
+La teoría estadística ofrece una forma de derivar la distribución de una variable aleatoria, definida como extracciones aleatorias de una urna: **la distribución binomial** . Esta distribución muestra que (S+n)/2 sigue una distribución de ese tipo. Esto evita la necesidad de correr simulaciones montecarlo o la aproximación normal para conocer la distribución de S. 
+
+### Diferencia entre una distribución y una distribución de probabilidad. 
+
+Cualquier lista de números tiene una distribución. En términos matemáticos esta distribución está definida por: ¿Cuál proporción es igual o menor que a?
+f(a) = proporción de números en la lista menores o iguales que a.
+Para una distribución, cuando es normal, la media y la desviación estándar son buenos estadísticos de resumen. 
+
+Una variable aleatoria tiene una **Distribución de probabilidad** No se necesita una lista de números para calcular esta distribución, pues es teórica. En este caso, la distribución está definida por: 
+F(a) = Pr(x<=a)
+
+Las simulaciones Montecarlo, cuando se corren miles de veces, arrojan distribuciones probabilísticas muy cercanas a la distribución de probabilidad teórica para los valores que considera la simulación montecarlo. 
+
+
+### Notación para variables aleatorias: 
+En textos de estadística, las letras mayúsculas se usan para denotar variables aleatorias y las minúsculas para variables observadas. 
+X mayúscula puede representar un número aleatorio en un lanzamiento de dados, y la x minúscula el número actual. Así por ejemplo, se puede decir que la probabilidad de que un número específico sea igual al de la variable aleatoria, es de 1/6: 
+Pr(X=x) = 1/6
+Nótese que X se refiere a lo que se espera que sea, y x se refiere a lo que de hecho eso. En estadística buena parte del razonamiento es qué tanto lo que de hecho es se ajusta a lo que se espera que sea. 
+
+### Teorema del límite central: 
+Este teorema señala que cuando el número de intentos (tamaño de la muestra) es granda, la distribución de probabilidad de la suma de estos intentos es aproximadamente normal. Este es considerado uno de los descubrimientos matemáticos más importantes de la historia. 
+Gracias a esto podemos resumir todas las distribuciones que se ajusten a la normalidad, con la media y la desviación estándar. Gracias a esto también podemos resumir todas las distribuciones de probabilidad que se acerquen a la normalidad, con el valor esperado y el error estándar (media y ds de la distribución de probabilidad). 
+
+### teoría mátemática para aproximarse a la distribución de probabilidades para la suma de intentos. 
+
+Para la suma de intentos, podemos usar una aproximación similar al ejercicio del casino que acabamos de hacer: 
+#### valor esperado y variabilidad. 
+El valor esperado se representa con una E mayúscula así: 
+E[X]= µ
+El valor esperado para una variable aleatoria es la media. 
+Una variable aleatoria va a variar alrededor del valor esperado de forma tal que, si tomas la promedio de muchos intentos, este promedio va a aproximarse al valor esperado, acercándose cada vez más en en la medida que se hagan más intentos. 
+
+Una fórmula útil para acercarse al valor esperado en una urna como la usada en el casino, es que el valor esperado es igual al promedio de valores que hay dentro de esa urna. Por ejemplo, teníamos un total de 38 bolas, 20 representando ganancia para el propietario (1), y 18 representando pérdida para el propietario. En ese sentido las sumamos y las dividimos por el número de bolas: 
+```{r}
+((18*-1)+(20*1))/38
+```
+
+Aqué el promedio es 0.05 y es lo que se esperaría como valor. 
+
+Aunque parece contraintuitivo, podríamos decir que el casino ganta, en promedio, 0.05 dólares por cada juego en la ruleta. 
+Esto se puede confirmar con una simulación montecarlo: 
+¿Cuál es el promedio de juegos ganados en un millon de juegos?
+```{r}
+mean(sample(c(1,-1), 1000000, replace=TRUE, prob = (c(10/19, 9/19))))
+```
+
+Es una cifra muy aproximada. 
+
+** Si la urna tiene dos posibles resultados: resultado a y resultado b, con proporciones p y 1-p, el promedio es a veces p + b veces 1-p. **
+
+Valor esperado de una variable aleatoria: 
+
+ap + b(1-p)
+
+
+La razón por la que se define el valor esperado, es que resulta útil para aproximarse a la distribución de probabilidad de las sumas, la cual, a au vez, es util para describir la distribución de promedios y proporciones. 
+
+Por ejemplo, el valor esperado de la suma de intentos es, el número de intentos por el promedio de números en la urna: 
+
+Valor esperado suma de intentos = número de intentos*promedio de los números en la urna. 
+
+Lo anterior es igual a decir que el valor esperado para la suma de intentos es igual al número de intentos por el valor esperado de la variable aleatoria. En ese sentido sería igual a : 
+
+n * (ap+b(1-p))
+
+Así, teniendo en cuenta que la variable esperada es 0.05, si la gentes juega 1000 veces, se espera que en promedio el casino gane 50 dólares. 
+
+Ahora, ese es el valor esperado y ya hemos dicho que este puede variar alrededor del valor esperado. El error estándar nos dá una medida de cuánto puede variar ese valor esperado: 
+
+Este error estándar es la raíz cuadrada del número de intentos multiplicado por la desviación estándar de los números en la urna. 
+
+sqr(número de intentos) * desviación estándar de los números en la urna. 
+
+Esto es lo mismo que decir que: 
+
+SE[X] = |b-a|*sqrt(p(1-p))
+
+El error estándar habla de la variación típica entre el valor esperado y el valor real. 
+
+## Promedios derivadas de la media y ds de los intentos y la suma de los intentos. 
+
+Hay algunos resultados útiles, que se basan en los cálculos anteriores, que facilitan el trabajo con datos. 
+
+### Propiedad 1
+El valor esperado de la suma de variables aleatorias, es la suma de los valores esperados de las variables aleatorias individuales:
+E[X1+X2+X3...+Xn] = E[X1] + E[X2] + E[X3] + ...E[Xn] 
+
+Esto se representa así: 
+E[X1+X2+...+Xn] = nµ
+
+### Propiedad 2
+El valor esperado de una variable aleatoria, multiplicada por una constante no aleatoria, es el valor esperado multiplicado por la constante no aleatoria:
+E[aX] = a * E[X]
+
+Una consecuencia de las dos anteriores propiedades es que el valor esperado del promedio de intentos desde la misma urna, es el valor esperado de la urna (µ):
+
+E[(X1+X2+...+Xn)/n] = E[X1+X2+...+Xn]/n = nµ/n = µ
+
+### Propiedad 3
+El cuadrado del error estándar de la suma de variables aleatorias independientes, es la suma del cuadrado del error estándar de cada variable independiente: 
+
+SE[X1+X2+...Xn] = sqrt(power(SE[X1])+power(SE[X2])+...+power(SE[Xn]))
+
+El cuadrado del error estándar es la varianza
+
+Varianza[X1] = power(SE[X1])
+
+### Propiedad 4
+El error estándar de una variable aleatoria, multiplicado por una constante no aleatoria, es el error estándar multiplicado por la constante no aleatoria
+
+SE[aX] = a * SE[X]
+
+Una consecuencia de estas dos últimas propiedades es que el error estándar del promedio de intentos de una misma urna, es la desviación estándar de la urna (σ) dividida por la raiz cuadrada de n: 
+
+SE[(X1+X2+...Xn)/n]= SE[X1+X2+...+Xn]/n = sqrt(power(SE[X1]+ power(SE[X2]+...+power(SE[Xn])) = sqrt(power(σ)+power(σ)+...+power(σ)) = sqrt(n*power(σ))/n = σ/sqrt(n)
+
+
+### propiedad 5
+Si X es una variable aleatoria normalmente distribuída, entonces si a y b son constantes no aleatorias, aX+b también es una variable aleatoria normalmente distribuída. 
+
+### Ley de los grandes números. 
+Esta ley establece que en la medida que se incrementa n, el error estándar del promedio de una variable aleatoria decrece; en toras palabras, cuando n es grande, el promedio de intentos converge hacia el promedio de la urna. 
+
+Esta ley también es conocida como la ley de los promedios. 
+
+La ley de los grandes número sólo aplica cuando n es MUY grande y los eventos son independientes. 
+
+Este MUY grande depende de las probabilidades de éxito: 
+- Si la probabilidad es muy alta, entonces se necesitan pocas observaciones. 
+- Si la probabilidad es baja, se requieren muchas observaciones. 
+- Si la probabilidad es extremadamente baja, se requiere una distribución diferente a la normal, como la de Poisson. 
+
+## Caso aplicado: El gran Short en las tasas de interés
+Lo que hemos visto hasta ahora es usado por los bancos para decidir la tasa de interés. 
+
+Supongamos que tenemos un banco que tiene una historia en la identificación de potenciales propietarios de casa en los que se puede confiar que pagarán. 
+
+Históricamente, en un año, sólo el 2% de los deudores no pagan el dinero que se les prestó. 
+
+En ese sentido, si se presta dinero sin interés, se terminará perdiendo dinero debido a este 2% de morosos. 
+
+Aunque sabemos que el 2% son morosos, no sabemos cuáles serán los clientes morosos. 
+
+Sin embargo, cargando a cada cliente un extra, se puede compensar ese 2% de morosos y hacer algo adicional para pagar a los empleados y mantener los préstamos funcionando. 
+
+También puedo hacer ganancias, pero si subo mucho los intereses, los clientes se irán a otro banco. 
+
+Usaremos estos hechos y algo de la teoría de la probabilidad para decidir qué tasa de interés debemos cobrar. 
+
+Supongamos que este año haremos 1000 préstamos de 180.000, También supongamos que, para cada crédito en mora, el banco termina perdiendo 200.000 debido a los juicios hipotecarios y demás gastos. 
+
+Esto lo podemos programar así: 
+```{r}
+n <- 1000
+loss_per_foreclosure <- -200000
+p <- 0.02
+defaults <- sample(c(0,1), n, prob = c(1-p, p), replace = TRUE)
+sum(defaults*loss_per_foreclosure)
+```
+Corriendo la simulación, podemos ver que, con los 1000 créditos al año, el banco termina perdiendo casi tres millones de dólares. 
+Por supuesto, esto es una variable aleatoria y, cada vez que se corre la simulación se termina obteniendo un estimado diferente. 
+
+Facilmente podemos construir una simulación montecarlo para tener una idea de la distribución de esta variable aletoria: 
+```{r}
+B <- 10000
+losses <- replicate(B, {
+  defaults <- sample(c(0,1), n, prob = c(1-p, p), replace = TRUE)
+  sum(defaults*loss_per_foreclosure)
+})
+```
+Convirtámoslo en un dataframe para que sea fácil graficarlo: 
+
+```{r}
+data.frame(losses_in_millions = losses/10^6)%>%ggplot(aes(losses_in_millions))+
+  geom_histogram(binwidth = 0.6, col = "black")
+```
+
+No necesitamos una distribución de Montecarlo. 
+En la medida que se trata de sumas de muestras independientes, su distribución es aproximadamente normal con el valor esperado y la desviación estándar dada por la siguiente fórmula: 
+```{r}
+(p*loss_per_foreclosure+(1-p)*0)-n
+abs(loss_per_foreclosure)*sqrt(p*(1-p))*sqrt(n)
+```
+
+Con esta información, podemos proponer una tasa de interés que garantice que, en promedio, libramos el dinero. 
+Esta tasa es una  cantidad x para cada préstamo, que, en este caso, está representada por un "empate" de tal forma que el valor esperado sea 0. 
+Para eso, ap+b(1-p), lo vamos a reemplazar por la siguiente fórmula: 
+lp+x(1-p) = 0
+
+l representará las pérdidas por juicios de hipoteca, y x representará la tasa que necesitamos con el fin de que el resultado sea 0. 
+Para despejar x, tendremos que aplicar la siguiente fórmula: 
+-lp/1-p
+Con eso, podremos saber de cuánto tendrá que ser x, es decir, la cantidad adicional que se necesita recoger para cada préstamo.: 
+
+```{r}
+-loss_per_foreclosure*p/(1-p)
+```
+
+Esto implica un interés de alrededor del 2%
+```{r}
+4081/180000
+```
+
+El problema con esto es que aún hay un 50% de probabilidades de que, en promedio, el banco pierda dinero, así que queremos que esto sea menos probable, por lo tanto queremos tasas de interés más altas, pero competitivas. 
+
+Queremos que la probabilidad de que perder dinero sea de 1%, en ese sentido, lo representamos así: 
+
+Pr(S<0)=0.01
+
+El valor esperado de S es dado por esta fórmula: 
+
+S = (lp +x(1-p))*n
+
+El error estándar de X es dado por esta fórmula: 
+
+|x-l|*sqrt(np(1-p))
+
+Vamos a agregar y a sustraer las mismas cantidades en abmos lados de Pr(S<0)= 0.01, de tal forma que las probabilidades no cambien y terminemos con una variable aleatoria normal en la izquierda, que luego nos permita escribir una ecuación con sólo la incognita x. 
+
+Pr(S<0)= 0.01
+
+Vamos a sustraer el valor esperado de S y a dividirlo por el error estándar de S en ambos lados de la ecuación. 
+
+Pr((S-E[S])/SE[S]< -(E[S])/(SE[S])) = 0.01
+
+La primera parte de la desigualdad es simplemente la puntuación Z de s, pues se le resta el valor esperado y se le divide por el error stándar. Así que la fórmula queda así: 
+
+pr (Z < (lp+x(1-p))*n)/|x-l|*sqrt(np(1-p))=0.01
+
+Debido a que Z es una variable aleatoria con media 0 y ds 1, es equivalente a qnorm(0.01), lo cual es -2.326348
+
+la parte derecha de la desigualdad es un z minúscula, básicamente se está buscando saber si la probabilidad de que Z sea menor que z, es igual a 0.01:
+
+Pr(Z<=z)=0.01
+
+Lo cual nos deja con que: 
+
+z = (lp+x(1-p))*n)/|x-l|*sqrt(np(1-p))
+
+Si despejamos x de la anterior fórmula nos queda: 
+
+x= -loss_per_foreclosure*( n*p - z*sqrt(n*p*(1 - p_default)))/ ( n*(1 - p) + z*sqrt(n*p*(1 - p)))
+
+El resultado de esta fórmula es que x es igual a 6249.181, lo cual es un interés de aproximadamente 3%. Con esto también tenemos una ganancia aproximada de 2124 por crédito, un poco más de dos millones en los mil créditos. 
+
+### El gran Short. 
+Un empleado dice que, puesto que estás haciendo 2 mil dólares por préstamo, deberías de dar más prestamos. ¿Por qué sólo 1000?. Yo respondo que conseguir esos mil clientes es difícil, pues se necesita un grupo predecible que mantenga las probabilidades consideradas. 
+El empleado responde que, incluso si la probabilidad de mora es más alta, en tanto el valor esperado sea positivo, se pueden minimizar las posibilidades de perder dinero incrementando el número de préstamos y confiando en la ley de los grandes números. 
+
+Expresa que, incluso si la mora llega al 4%, si especificamos una tasa de interés un poco más alta, se tendrá un valor esperado positivo. 
+
+Por lo tanto, si especificamos la tasa de interés en un 5%, tendremos garantizado un valor positivo esperado de 640 dólares por préstamos. Y que en la medida que se aumenten los préstamos, se disminuye el error estándar, debido a la ley de los grandes números. 
+
+En este escenario necesitamos aumentar el número de préstamos a 22163, de tal manera que nuestra probabilidad de perder sea de 1%. Con esto esperamos ganar 14millones. 
+
+Esto fue un error y llevó a la bancarota al banco. 
+
+¿Por qué un error?
+Para que la ley de los grandes números se cumpla, se necesita que los intentos sean independientes. En este caso, que la mora de un cliente sea independiente de la mora de otro, pero ¿qué pasaría si ocurriera un evento global que afectara las probabilidades de que las personas pagaran su deuda? ya no sería independiente. 
+
+La crisis financiera de 2007 se debió, entre otras cosas, a que los expertos en finanzas asumieron una independencia que nunca existió. 

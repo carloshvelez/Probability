@@ -1,0 +1,77 @@
+# Ecuaciones en probabilidad
+
+## En encuestas (¿binomial?)
+
+### Para valores esperados (en la urna):
+
+Es la media de la urna, equivale a la media esperada para un esperimento:
+
+$$
+ap+bq
+$$
+
+$a = Evento 1.$
+
+$b = Evento 2$
+
+$p = probabilidad para evento 1$
+
+$q = probabilidad para evento 2$
+
+Como suele trabajarse con p, q se representa como 1-p:
+
+$q = 1-p$
+
+Esto equivale a que la fórmula más usada es:
+
+$$
+E[X] = ap+b(1-p) 
+$$
+
+### Para la Desviación estádar (error estándar) (en la urna)
+
+$$
+SE[X]= |b-a|\sqrt{p(1-p)}
+$$
+
+Valor absoluto de evento 2 menos evento 1 por la raiz cuadrada de p por 1 menos p.
+
+### Valor esperado para la suma de muestras:
+
+Es el valor esperado por el n de intentos:
+
+$$
+E[sumX] = E[x]*N
+$$
+
+Ya sabemos la formula de E[X], entonces:
+
+$$
+E[sumX]= (ap+p(1-p))*N 
+$$
+
+$N= número de intentos$
+
+### 
+
+### Error estándar de la suma de sorteos:
+
+Para el error estándar de la suma, simplemente tomamos el error estándar de la urna y lo multiplicamos por la raíz cruadrada de n:
+
+$$
+SE[sumX]= SE[X]\sqrt{N}
+$$
+
+Ya sabemos cómo se calcula SE[X] entonces simplemente lo reemplazamos:
+
+$$
+SE[sumX]= |b-a|*\sqrt{p(1-p)}*\sqrt{N}
+$$
+
+### Error estándar del promedio de los sorteos:
+
+Es igual a la suma, pero, en vez de multiplicar, lo dividimos:
+
+$$
+SE[sumX]= \frac{|b-a|*\sqrt{p(1-p)}}{\sqrt{N}}
+$$
